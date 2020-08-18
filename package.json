@@ -1,0 +1,18 @@
+{
+  "name": "server-ftp-ssh",
+  "version": "1.0.0",
+  "description": "Integracion entre dos plataformas",
+  "main": "index.js",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "ftp-srv": "^4.3.2",
+    "node-xlsx": "^0.15.0",
+    "ssh2-sftp-client": "^5.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "FML-DEV",
+  "license": "ISC"
+}
