@@ -2,12 +2,14 @@
 
 const Client = require("ssh2-sftp-client");
 const fs = require("fs");
+let arrSrc = [];
 
 var sftpGet, sftpSend;
 var count = 0;
 
+
 function filterFiles(files) {
-    const pedidos = fs.readdirSync("./files/pedidos");
+    const pedidos = fs.readdirSync("./files/pedidos/original");
     let arrayFiles = files.filter((file) => {
         for (let i = 0; i < pedidos.length; i++) {
             if (pedidos[i] == file.name) {
@@ -19,22 +21,26 @@ function filterFiles(files) {
     return arrayFiles;
 }
 function getData(config) {
+    arrSrc = [];
     sftpGet = new Client(`${count}`);
     sftpGet
         .connect(config)
         .then(() => {
-            sftpGet.list("/files");
+            return sftpGet.list("/files");
         })
         .then((data) => {
+            console.log(data);
             let files = filterFiles(data);
             files.forEach((file) => {
                 let serverPath = "/files/" + file.name;
-                let localPath = `./files/pedidos/${file.name}`;
-                sftpGet.get(serverPath, localPath);
+                let localPath = `./files/pedidos/original/${file.name}`;
+                arrSrc.push(file)
+                return sftpGet.get(serverPath, localPath);
             });
         })
         .catch((err) => console.log(err));
     count++;
+    return arrSrc;
 }
 
 function sendData(csvFiles, config) {
