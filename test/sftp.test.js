@@ -3,13 +3,14 @@
 const Client = require("ssh2-sftp-client");
 
 const sftp = new Client("test");
+require("dotenv").config();
 
 // SSH2 CONFIG
 const config = {
-    host: "qa.vega.lyracons.tk",
-    port: 2222,
-    username: "naima",
-    password: "oCqv6E01HMOWp",
+    host: process.env.SSH_HOST,
+    port: process.env.SSH_PORT,
+    username: process.env.SSH_USER,
+    password: process.env.SSH_PASS,
 };
 
 sftp.connect(config)
