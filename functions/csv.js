@@ -15,24 +15,29 @@ function csvToXls(files) {
     setTimeout(() => {
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            let src = `./files/pedidos/original/${file.name}`;
+            let src = `./ftp_files/orders/pending/${file.name}`;
             let dataParsed = csvParse(src);
             setTimeout(() => {
-                let buffer = xlsx.build([{ name: "pedidos", data: dataParsed }]);
+                let buffer = xlsx.build([
+                    { name: "pedidos", data: dataParsed },
+                ]);
+                let fileName = file.name;
+                fileName = fileName.split(".");
+                fileName.pop();
+                fileName = fileName.join();
                 fs.writeFile(
-                    `./files/pedidos/excel/${file.name}.xlsx`,
+                    `./ftp_files/orders/processed/${fileName}.xlsx`,
                     buffer,
                     (err) => {
                         if (err) return console.error(err);
                         console.log(`${file.name} Creado exitosamente`);
                     }
                 );
-            }, 2000)
+            }, 2000);
         }
-    }, 3000)
+    }, 3000);
 }
-
 
 module.exports = {
-    csvToXls: csvToXls
-}
+    csvToXls: csvToXls,
+};

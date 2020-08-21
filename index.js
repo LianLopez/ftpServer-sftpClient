@@ -1,7 +1,7 @@
 const FtpSvr = require("ftp-srv");
 const fs = require("fs");
 const xls_csv = require("./functions/xls-csv");
-const csv = require("./functions/csv")
+const csv = require("./functions/csv");
 const ssh2 = require("./functions/ssh2");
 
 require("dotenv").config();
@@ -67,8 +67,8 @@ ftpServer.on("login", (data, resolve, reject) => {
         data.password == process.env.PASS
     ) {
         let files = ssh2.getData(config);
-        csv.csvToXls(files);
-        resolve({ root: `./files` });
+        if (files.length > 0) csv.csvToXls(files);
+        resolve({ root: `./ftp_files` });
         data.connection.on("STOR", (error, fileName) => {
             if (error) {
                 console.error(

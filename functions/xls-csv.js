@@ -52,27 +52,29 @@ function createPrices(rows) {
 }
 
 function createCsv(nombre, data, tipo) {
-    fs.writeFile("./files/processed_files/" + tipo + nombre, data, function (
-        err
-    ) {
-        if (err) {
-            return console.log(err);
+    fs.writeFile(
+        "./ftp_files/processed_files/" + tipo + nombre,
+        data,
+        function (err) {
+            if (err) {
+                return console.log(err);
+            }
+            console.log(`${nombre} was saved in the current directory!`);
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(nombre);
+                }, 2000);
+            });
         }
-        console.log(`${nombre} was saved in the current directory!`);
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(nombre);
-            }, 2000);
-        });
-    });
+    );
 }
 
 //writes to a file, but you will presumably send the csv as a
 //response instead
 
 function createFile(data) {
-    const filesStock = fs.readdirSync("./files/processed_files/stock");
-    const filesPrice = fs.readdirSync("./files/processed_files/prices");
+    const filesStock = fs.readdirSync("./ftp_files/processed_files/stock");
+    const filesPrice = fs.readdirSync("./ftp_files/processed_files/prices");
     archivoActual = crearNombreArchivo();
     filesStock.forEach((archivo) => {
         for (let j = 0; j < archivo.length; j++) {

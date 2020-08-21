@@ -7,9 +7,8 @@ let arrSrc = [];
 var sftpGet, sftpSend;
 var count = 0;
 
-
 function filterFiles(files) {
-    const pedidos = fs.readdirSync("./files/pedidos/original");
+    const pedidos = fs.readdirSync("./ftp_files/orders/pending");
     let arrayFiles = files.filter((file) => {
         for (let i = 0; i < pedidos.length; i++) {
             if (pedidos[i] == file.name) {
@@ -26,15 +25,15 @@ function getData(config) {
     sftpGet
         .connect(config)
         .then(() => {
-            return sftpGet.list("/files");
+            return sftpGet.list("/orders/processed/");
         })
         .then((data) => {
             console.log(data);
             let files = filterFiles(data);
             files.forEach((file) => {
-                let serverPath = "/files/" + file.name;
-                let localPath = `./files/pedidos/original/${file.name}`;
-                arrSrc.push(file)
+                let serverPath = "/orders/processed" + file.name;
+                let localPath = `./ftp_files/orders/pending/${file.name}`;
+                arrSrc.push(file);
                 return sftpGet.get(serverPath, localPath);
             });
         })
@@ -52,13 +51,13 @@ function sendData(csvFiles, config) {
                 const element = csvFiles[i];
                 if (i == 0) {
                     sftpSend.put(
-                        "./files/processed_files/stock/" + element,
-                        `/outbound/processed/${element}`
+                        "./ftp_files/processed_files/stock/" + element,
+                        `/stock/pending/${element}`
                     );
                 } else {
                     sftpSend.put(
-                        "./files/processed_files/prices/" + element,
-                        `/inbound/processed/${element}`
+                        "./ftp_files/processed_files/prices/" + element,
+                        `/price/pending/${element}`
                     );
                 }
             }
