@@ -1,2 +1,15 @@
 node_modules
 .env
+ftp_files/add_files/*
+ftp_files/backup/*
+ftp_files/orders/processed/*
+ftp_files/orders/pending/*
+ftp_files/processed_files/prices/*
+ftp_files/processed_files/stock/*
+
+!ftp_files/add_files/.gitkeep
+!ftp_files/backup/.gitkeep
+!ftp_files/orders/pending/.gitkeep
+!ftp_files/orders/processed/.gitkeep
+!ftp_files/processed_files/prices/.gitkeep
+!ftp_files/processed_files/stock/.gitkeep
