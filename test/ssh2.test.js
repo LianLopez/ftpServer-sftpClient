@@ -1,5 +1,5 @@
 "use strict";
-
+const http = require("http");
 const Client = require("ssh2-sftp-client");
 
 const sftp = new Client("test");
@@ -13,13 +13,22 @@ const config = {
     password: process.env.SSH_PASS,
 };
 
-sftp.connect(config)
-    .then(() => {
-        return sftp.list("/");
-    })
-    .then((data) => {
-        console.log(data);
-    })
-    .catch((err) => {
-        console.error(err);
-    });
+const host = "localhost";
+const port = 8000;
+
+const requestListener = function (req, res) {};
+
+const server = http.createServer(requestListener);
+server.listen(port, host, () => {
+    console.log(`Server is running on http://${host}:${port}`);
+    sftp.connect(config)
+        .then(() => {
+            return sftp.list("/");
+        })
+        .then((data) => {
+            console.log(data);
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+});
