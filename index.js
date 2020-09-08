@@ -14,6 +14,8 @@ const config = {
     port: process.env.SSH_PORT,
     username: process.env.SSH_USER,
     password: process.env.SSH_PASS,
+    algorithms: {},
+    localAddress: process.env.HOST,
 };
 
 // Methods
@@ -48,33 +50,42 @@ function callback(err) {
 
 function backupFile(fileName) {
     let nombre = fileName;
-    let nombreArray = nombre.split("\\");
-    nombre = "./files/backup/" + xls_csv.fecha() + "-" + nombreArray.pop();
+    let nombreArray = nombre.split("/");
+    nombre = "./ftp_files/backup/" + xls_csv.fecha() + "-" + nombreArray.pop();
     fs.copyFile(fileName, nombre, callback);
     var dirNames = xls_csv.processFile(fileName);
     setTimeout(() => ssh2.sendData(dirNames, config), 5000);
 }
 
 // FTP Server
-
-const ftpServer = new FtpSvr("ftp://" + hostname + ":" + port, {
+const url = `ftp://${hostname}:${port}`;
+const ftpServer = new FtpSvr({
+    url: url,
     anonymous: false,
 });
 
 ftpServer.on("login", (data, resolve, reject) => {
     if (
-        data.username == process.env.USER &&
-        data.password == process.env.PASS
+        data.username == process.env.USER_FTP &&
+        data.password == process.env.PASS_FTP
     ) {
         let files = ssh2.getData(config);
-        if (files.length > 0) csv.csvToXls(files);
+        if (files.length > 0) {
+            ssh2.moveFiles(files, config);
+            csv.csvToXls(files);
+        }
         resolve({ root: `./ftp_files` });
         data.connection.on("STOR", (error, fileName) => {
             if (error) {
                 console.error(
                     `FTP server error: could not receive file ${fileName} for upload ${error}`
                 );
-                createLog(fileName, error);
+                let name = fileName;
+                name = name.split(".");
+                nameReversed = name.reverse();
+                if (nameReversed[0] == "xls" || nameReversed[0] == "xlsx") {
+                    createLog(fileName, error);
+                }
             } else {
                 console.info(
                     `FTP server: upload successfully received - ${fileName}`

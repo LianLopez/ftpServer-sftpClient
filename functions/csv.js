@@ -33,6 +33,10 @@ function csvToXls(files) {
                         console.log(`${file.name} Creado exitosamente`);
                     }
                 );
+                fs.unlink(src, (err) => {
+                    if (err) throw err;
+                    console.log(`${file.name} was deleted`);
+                });
             }, 2000);
         }
     }, 3000);

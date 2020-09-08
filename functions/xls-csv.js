@@ -28,8 +28,8 @@ function fecha(num = 0) {
 
 function createStock(rows) {
     let writeStr = "";
-    for (var i = 0; i < rows.length; i++) {
-        var rowsFormated = rows[i].map((element) => {
+    for (let i = 0; i < rows.length; i++) {
+        let rowsFormated = rows[i].map((element) => {
             return element;
         });
         rowsFormated.push("1_1");
@@ -40,8 +40,8 @@ function createStock(rows) {
 }
 function createPrices(rows) {
     let writeStr = "";
-    for (var i = 0; i < rows.length; i++) {
-        var rowsFormated = rows[i].map((element) => {
+    for (let i = 0; i < rows.length; i++) {
+        let rowsFormated = rows[i].map((element) => {
             return element;
         });
         rowsFormated.push(rowsFormated[1]);
@@ -102,11 +102,11 @@ function processFile(src) {
     let obj = xlsx.parse(src); // parses a file
     for (let i = 0; i < obj.length; i++) {
         let sheet = obj[i];
-        //loop through all rows in the sheet
+        // Realiza un Loop por las hojas del archivo excel
         for (let j = 1; j < sheet["data"].length; j++) {
-            //add the row to the rows array
-            let row = sheet["data"][j];
-            row.splice(1, 1);
+            //Procesando el archivo excel para su conversion a csv
+            let element = sheet["data"][j];
+            let row = [element[0], element[6], element[12]]
             if (row[2] < 0) row[2] = 0;
             rows.push(row);
         }

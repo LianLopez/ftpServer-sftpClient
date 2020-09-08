@@ -25,13 +25,13 @@ function getData(config) {
     sftpGet
         .connect(config)
         .then(() => {
-            return sftpGet.list("/orders/processed/");
+            return sftpGet.list("/orders/pending/");
         })
         .then((data) => {
             console.log(data);
             let files = filterFiles(data);
             files.forEach((file) => {
-                let serverPath = "/orders/processed" + file.name;
+                let serverPath = "/orders/pending" + file.name;
                 let localPath = `./ftp_files/orders/pending/${file.name}`;
                 arrSrc.push(file);
                 return sftpGet.get(serverPath, localPath);
@@ -67,8 +67,33 @@ function sendData(csvFiles, config) {
         });
     count++;
 }
+function moveFiles(files, config) {
+    sftpMove = new Client(`${count}`);
+    sftpMove
+        .connect(config)
+        .then(() => {
+            for (let i = 0; i < files.length; i++) {
+                const element = files[i];
+                sftpMove.put(
+                    "./ftp_files/orders/pending/" + element,
+                    `/orders/processed/${element}`
+                );
+            }
+        })
+        .then(() => {
+            for (let i = 0; i < files.length; i++) {
+                const element = files[i];
+                sftpMove.delete(`/orders/pending/${element}`);
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+    count++;
+}
 
 module.exports = {
     getData: getData,
     sendData: sendData,
+    moveFiles: moveFiles,
 };
