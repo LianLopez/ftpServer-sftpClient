@@ -1,7 +1,6 @@
 const FtpSvr = require("ftp-srv");
 const fs = require("fs");
 const xls_csv = require("./functions/xls-csv");
-const csv = require("./functions/csv");
 const ssh2 = require("./functions/ssh2");
 
 require("dotenv").config();
@@ -14,7 +13,33 @@ const config = {
     port: process.env.SSH_PORT,
     username: process.env.SSH_USER,
     password: process.env.SSH_PASS,
-    algorithms: {},
+    algorithms: {
+        kex: [
+            "diffie-hellman-group1-sha1",
+            "ecdh-sha2-nistp256",
+            "ecdh-sha2-nistp384",
+            "ecdh-sha2-nistp521",
+            "diffie-hellman-group-exchange-sha256",
+            "diffie-hellman-group14-sha1",
+        ],
+        cipher: [
+            "3des-cbc",
+            "aes128-ctr",
+            "aes192-ctr",
+            "aes256-ctr",
+            "aes128-gcm",
+            "aes128-gcm@openssh.com",
+            "aes256-gcm",
+            "aes256-gcm@openssh.com",
+        ],
+        serverHostKey: [
+            "ssh-rsa",
+            "ecdsa-sha2-nistp256",
+            "ecdsa-sha2-nistp384",
+            "ecdsa-sha2-nistp521",
+        ],
+        hmac: ["hmac-sha2-256", "hmac-sha2-512", "hmac-sha1"],
+    },
     localAddress: process.env.HOST,
 };
 
@@ -69,11 +94,7 @@ ftpServer.on("login", (data, resolve, reject) => {
         data.username == process.env.USER_FTP &&
         data.password == process.env.PASS_FTP
     ) {
-        let files = ssh2.getData(config);
-        if (files.length > 0) {
-            ssh2.moveFiles(files, config);
-            csv.csvToXls(files);
-        }
+        ssh2.getData(config);
         resolve({ root: `./ftp_files` });
         data.connection.on("STOR", (error, fileName) => {
             if (error) {
