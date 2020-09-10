@@ -2,9 +2,9 @@
 
 const Client = require("ssh2-sftp-client");
 const fs = require("fs");
-let arrSrc = [];
+const { csvToXls } = require("./csv");
 
-var sftpGet, sftpSend;
+var sftpGet, sftpSend, sftpMove;
 var count = 0;
 
 function filterFiles(files) {
@@ -19,27 +19,68 @@ function filterFiles(files) {
     });
     return arrayFiles;
 }
+
+let moveFiles = (files, config) => {
+    sftpMove = new Client(`${count}`);
+    sftpMove
+        .connect(config)
+        .then(() => {
+            for (let i = 0; i < files.length; i++) {
+                const element = files[i];
+                sftpMove
+                    .put(
+                        "./ftp_files/orders/pending/" + element,
+                        `/orders/processed/${element}`
+                    )
+                    .then(() => {
+                        console.log(`Archivo enviado correctamente ${element}`);
+                    })
+                    .catch((err) => console.log(err));
+            }
+        })
+        .then(() => {
+            for (let i = 0; i < files.length; i++) {
+                const element = files[i];
+                sftpMove
+                    .delete(`/orders/pending/${element}`)
+                    .then(() =>
+                        console.log(`Archivo borrado correctamente ${element}`)
+                    )
+                    .catch((err) => console.error(err));
+            }
+        })
+        .then(() => {
+            csvToXls(files);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+    count++;
+};
+
 function getData(config) {
-    arrSrc = [];
+    let arrSrc = [];
     sftpGet = new Client(`${count}`);
     sftpGet
         .connect(config)
         .then(() => {
-            return sftpGet.list("/orders/pending/");
+            return sftpGet.list("/orders/pending");
         })
         .then((data) => {
             console.log(data);
             let files = filterFiles(data);
+            console.log(`archivos filtrados del SFTP ${files}`);
             files.forEach((file) => {
-                let serverPath = "/orders/pending" + file.name;
+                let serverPath = "/orders/pending/" + file.name;
                 let localPath = `./ftp_files/orders/pending/${file.name}`;
-                arrSrc.push(file);
+                arrSrc.push(file.name);
                 return sftpGet.get(serverPath, localPath);
             });
+            console.log(arrSrc);
+            if (arrSrc.length > 0) moveFiles(arrSrc, config);
         })
         .catch((err) => console.log(err));
     count++;
-    return arrSrc;
 }
 
 function sendData(csvFiles, config) {
@@ -67,33 +108,9 @@ function sendData(csvFiles, config) {
         });
     count++;
 }
-function moveFiles(files, config) {
-    sftpMove = new Client(`${count}`);
-    sftpMove
-        .connect(config)
-        .then(() => {
-            for (let i = 0; i < files.length; i++) {
-                const element = files[i];
-                sftpMove.put(
-                    "./ftp_files/orders/pending/" + element,
-                    `/orders/processed/${element}`
-                );
-            }
-        })
-        .then(() => {
-            for (let i = 0; i < files.length; i++) {
-                const element = files[i];
-                sftpMove.delete(`/orders/pending/${element}`);
-            }
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-    count++;
-}
 
 module.exports = {
-    getData: getData,
-    sendData: sendData,
-    moveFiles: moveFiles,
+    getData,
+    sendData,
+    moveFiles,
 };
