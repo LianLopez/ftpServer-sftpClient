@@ -12,34 +12,28 @@ function csvParse(url) {
 }
 
 function csvToXls(files) {
-    setTimeout(() => {
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            let src = `./ftp_files/orders/pending/${file.name}`;
-            let dataParsed = csvParse(src);
-            setTimeout(() => {
-                let buffer = xlsx.build([
-                    { name: "pedidos", data: dataParsed },
-                ]);
-                let fileName = file.name;
-                fileName = fileName.split(".");
-                fileName.pop();
-                fileName = fileName.join();
-                fs.writeFile(
-                    `./ftp_files/orders/processed/${fileName}.xlsx`,
-                    buffer,
-                    (err) => {
-                        if (err) return console.error(err);
-                        console.log(`${file.name} Creado exitosamente`);
-                    }
-                );
-                fs.unlink(src, (err) => {
-                    if (err) throw err;
-                    console.log(`${file.name} was deleted`);
-                });
-            }, 2000);
-        }
-    }, 3000);
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        let src = `./ftp_files/orders/pending/${file}`;
+        let dataParsed = csvParse(src);
+        let buffer = xlsx.build([{ name: "pedidos", data: dataParsed }]);
+        let fileName = file;
+        fileName = fileName.split(".");
+        fileName.pop();
+        fileName = fileName.join();
+        fs.writeFile(
+            `./ftp_files/orders/processed/${fileName}.xlsx`,
+            buffer,
+            (err) => {
+                if (err) return console.error(err);
+                console.log(`${file} Creado exitosamente csvToXls`);
+            }
+        );
+        fs.unlink(src, (err) => {
+            if (err) throw err;
+            console.log(`${file} was deleted`);
+        });
+    }
 }
 
 module.exports = {
