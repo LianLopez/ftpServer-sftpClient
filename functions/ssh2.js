@@ -34,20 +34,17 @@ let moveFiles = (files, config) => {
                     )
                     .then(() => {
                         console.log(`Archivo enviado correctamente ${element}`);
+                        sftpMove
+                            .delete(`/orders/pending/${element}`)
+                            .then(() => {
+                                console.log(
+                                    `Archivo borrado correctamente ${element}`
+                                );
+                                csvToXls(element);
+                            })
+                            .catch((err) => console.error(err));
                     })
                     .catch((err) => console.log(err));
-            }
-        })
-        .then(() => {
-            for (let i = 0; i < files.length; i++) {
-                const element = files[i];
-                sftpMove
-                    .delete(`/orders/pending/${element}`)
-                    .then(() => {
-                        console.log(`Archivo borrado correctamente ${element}`);
-                        csvToXls(element);
-                    })
-                    .catch((err) => console.error(err));
             }
         })
         .catch((err) => {
@@ -65,17 +62,27 @@ function getData(config) {
             return sftpGet.list("/orders/pending");
         })
         .then((data) => {
-            console.log(data);
-            let files = filterFiles(data);
-            console.log(`archivos filtrados del SFTP ${files}`);
-            files.forEach((file) => {
-                let serverPath = "/orders/pending/" + file.name;
-                let localPath = `./ftp_files/orders/pending/${file.name}`;
-                arrSrc.push(file.name);
-                return sftpGet.get(serverPath, localPath);
-            });
-            console.log(arrSrc);
-            if (arrSrc.length > 0) moveFiles(arrSrc, config);
+            if (data.length > 0) {
+                console.log(`existen archivos del SFTP a importar`);
+                let files = filterFiles(data);
+                console.log(`archivos filtrados del SFTP ${files.length}`);
+                files.forEach((file) => {
+                    let serverPath = "/orders/pending/" + file.name;
+                    let localPath = `./ftp_files/orders/pending/${file.name}`;
+                    arrSrc.push(file.name);
+                    return sftpGet.get(serverPath, localPath);
+                });
+                if (arrSrc.length > 0) {
+                    console.log(`lista de archivos bajados ${arrSrc.length}`);
+                    for (let i = 0; i < arrSrc.length; i++) {
+                        const element = arrSrc[i];
+                        console.log(element);
+                    }
+                    moveFiles(arrSrc, config);
+                }
+            } else {
+                console.log("No hay archivos por procesar");
+            }
         })
         .catch((err) => console.log(err));
     count++;
@@ -89,15 +96,27 @@ function sendData(csvFiles, config) {
             for (let i = 0; i < csvFiles.length; i++) {
                 const element = csvFiles[i];
                 if (i == 0) {
-                    sftpSend.put(
-                        "./ftp_files/processed_files/stock/" + element,
-                        `/orders/pending/${element}`
-                    );
+                    sftpSend
+                        .put(
+                            "./ftp_files/processed_files/stock/" + element,
+                            `/stock/pending/${element}`
+                        )
+                        .then(() => {
+                            console.log(
+                                `${element} se subio correctamente a VEGA`
+                            );
+                        });
                 } else {
-                    sftpSend.put(
-                        "./ftp_files/processed_files/prices/" + element,
-                        `/orders/pending/${element}`
-                    );
+                    sftpSend
+                        .put(
+                            "./ftp_files/processed_files/prices/" + element,
+                            `/price/pending/${element}`
+                        )
+                        .then(() => {
+                            console.log(
+                                `${element} se subio correctamente a VEGA`
+                            );
+                        });
                 }
             }
         })

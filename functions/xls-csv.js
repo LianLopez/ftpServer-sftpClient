@@ -106,7 +106,7 @@ function processFile(src) {
         for (let j = 1; j < sheet["data"].length; j++) {
             //Procesando el archivo excel para su conversion a csv
             let element = sheet["data"][j];
-            let row = [element[0], element[6], element[12]]
+            let row = [element[0], element[6], element[12]];
             if (row[2] < 0) row[2] = 0;
             rows.push(row);
         }

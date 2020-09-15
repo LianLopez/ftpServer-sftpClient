@@ -101,17 +101,24 @@ ftpServer.on("login", (data, resolve, reject) => {
                 console.error(
                     `FTP server error: could not receive file ${fileName} for upload ${error}`
                 );
+                createLog(fileName, error);
+            } else {
                 let name = fileName;
                 name = name.split(".");
                 nameReversed = name.reverse();
-                if (nameReversed[0] == "xls" || nameReversed[0] == "xlsx") {
-                    createLog(fileName, error);
-                }
-            } else {
+                let dir = fileName;
+                dir = dir.split("/");
+                dirRev = dir.reverse();
+                console.log(dirRev);
                 console.info(
                     `FTP server: upload successfully received - ${fileName}`
                 );
-                createLog(fileName);
+                if (
+                    (nameReversed[0] == "xls" || nameReversed[0] == "xlsx") &&
+                    dirRev[1] == "add_files"
+                ) {
+                    createLog(fileName);
+                }
             }
         });
         console.log("Conexion establecida");

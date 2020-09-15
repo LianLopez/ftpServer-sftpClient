@@ -25,12 +25,12 @@ function csvToXls(file) {
         (err) => {
             if (err) return console.error(err);
             console.log(`${file} Creado exitosamente csvToXls`);
+            fs.unlink(src, (err) => {
+                if (err) throw err;
+                console.log(`${file} Borrado exitosamente csvToXls`);
+            });
         }
     );
-    fs.unlink(src, (err) => {
-        if (err) throw err;
-        console.log(`${file} was deleted`);
-    });
 }
 
 module.exports = {
