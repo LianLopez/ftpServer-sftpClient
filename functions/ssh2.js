@@ -43,14 +43,12 @@ let moveFiles = (files, config) => {
                 const element = files[i];
                 sftpMove
                     .delete(`/orders/pending/${element}`)
-                    .then(() =>
-                        console.log(`Archivo borrado correctamente ${element}`)
-                    )
+                    .then(() => {
+                        console.log(`Archivo borrado correctamente ${element}`);
+                        csvToXls(element);
+                    })
                     .catch((err) => console.error(err));
             }
-        })
-        .then(() => {
-            csvToXls(files);
         })
         .catch((err) => {
             console.log(err);
@@ -93,12 +91,12 @@ function sendData(csvFiles, config) {
                 if (i == 0) {
                     sftpSend.put(
                         "./ftp_files/processed_files/stock/" + element,
-                        `/stock/pending/${element}`
+                        `/orders/pending/${element}`
                     );
                 } else {
                     sftpSend.put(
                         "./ftp_files/processed_files/prices/" + element,
-                        `/price/pending/${element}`
+                        `/orders/pending/${element}`
                     );
                 }
             }
